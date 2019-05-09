@@ -4,12 +4,16 @@ import PropTypes from 'prop-types';
 
 const Button = ({classes, value, clickHandler, disabled, id}) => {
 
+  if (typeof classes === 'undefined') {
+    classes = ['primary'];
+  }
+
   return (
     <button
       key={ id }
       onClick={ clickHandler }
       type='button'
-      className={ `btn ${classes.map(cl => `btn-${ cl }`)}` }
+      className={ `btn ${classes.map(cl => `btn-${ cl }`).join(' ')}` }
       disabled={ disabled }
     >
       { value }
@@ -19,7 +23,7 @@ const Button = ({classes, value, clickHandler, disabled, id}) => {
 }
 
 Button.propTypes = {
-  classes: PropTypes.array.isRequired,
+  classes: PropTypes.array,
   value: PropTypes.string.isRequired,
   clickHandler: PropTypes.func.isRequired,
   disabled: PropTypes.bool,

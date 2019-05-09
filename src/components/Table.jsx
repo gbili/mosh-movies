@@ -17,17 +17,18 @@ const Table = ({ rows, headerRow, sort, footerRow}) => {
       </thead>
       )) || null }
       <tbody>{
-        rows.map( row => (
-          <TableRow
+        rows.map( row => {
+          return <TableRow
             key={ row.id.toString() }
             id={ row.id.toString() }
             cells={ row.cellsObject }
           />
-        )) }
+        }) }
       </tbody>
       { (footerRow && (
       <tfoot>
         <TableRow
+          id={footerRow.id || 'tableFooter'}
           cells={ footerRow.cellsObject }
           colspan={ footerRow.colspan || (Object.keys(footerRow.cellsObject).length === 1 && Object.keys(rows[0].cellsObject).length) }
         />

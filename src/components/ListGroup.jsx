@@ -1,27 +1,35 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const ListGroup = ({ defaultItem, currentItem, items, onItemSelect }) => {
-
-  items = [defaultItem, ...items]; // we dont want to alter the original array
+const ListGroup = ({ defaultItem, currentItem, items, onItemSelect, getItemKeyOrValue }) => {
 
   const isActive = (item) => {
     if (typeof item === 'object') {
-      return (currentItem === null && singlePropObjAreEqual(item, defaultItem)
+      return (currentItem === null
+        && singlePropObjAreEqual(item, defaultItem)
         ) || singlePropObjAreEqual(item, currentItem);
     }
     return (currentItem === null && defaultItem === item
       ) || item === currentItem;
   }
 
+  const els = [defaultItem, ...items];
   return (
     <ul className="list-group">{
-      items.map(item => {
+      els.map(item => {
         const className = "clickable list-group-item" + (isActive(item) ? ' active' : '');
-        const itemValue = (typeof item === 'object' && Object.values(item).pop()) || item;
+        let itemKey = null;
+        let itemValue = null;
+        if (typeof getItemKeyOrValue === 'function') {
+          itemKey = getItemKeyOrValue(item, 'key');
+          itemValue = getItemKeyOrValue(item, 'value');
+        } else {
+          itemKey = item.key;
+          itemValue = item.value;
+        }
         return (
           <li
-            key={ itemValue }
+            key={ itemKey }
             className={ className }
             onClick={ () => onItemSelect(item) }
           >

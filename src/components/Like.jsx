@@ -17,7 +17,7 @@ const Like = ({id, like, clickHandler}) => {
 }
 
 Like.propTypes = {
-  id: PropTypes.number.isRequired,
+  id: PropTypes.string.isRequired,
   like: PropTypes.bool.isRequired,
   clickHandler: PropTypes.func.isRequired,
 };

@@ -1,39 +1,51 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import Button from './Button';
 import Like from './Like';
 import FilterSortPaginatedTable from './FilterSortPaginatedTable';
+import {Link} from 'react-router-dom';
+
+import * as api from '../services/apiService';
+
+const propTypes = {
+  match: PropTypes.object.isRequired,
+};
 
 class Movies extends Component {
 
-  state = {
-    movies: [
-      {id: 1, title: 'The Who', genre: 'Musical', date: '1960', like: false},
-      {id: 2, title: 'The Who', genre: 'Musical', date: '1974', like: false},
-      {id: 3, title: 'Airplane', genre: 'Comedy', date: '1983', like: false},
-      {id: 4, title: 'China', genre: 'Comedy', date: '1991', like: false},
-      {id: 5, title: 'Vol au dessus', genre: 'Drama', date: '2004', like: false},
-      {id: 6, title: 'Martin Cappote', genre: 'Biopic', date: '1970', like: false},
-      {id: 7, title: 'Dart', genre: 'Musical', date: '1960', like: false},
-      {id: 8, title: 'Billy', genre: 'Musical', date: '1960', like: false},
-      {id: 9, title: '10 negritos', genre: 'Crime', date: '2004', like: false},
-      {id: 10, title: 'Dupontel', genre: 'Biopic', date: '2001', like: false},
-      {id: 11, title: 'Cancer', genre: 'Drama', date: '2013', like: false},
-      {id: 12, title: 'The Godfather', genre: 'Crime', date: '2025', like: false},
-      {id: 13, title: 'Eyes Wide Shut', genre: 'Drama', date: '1925', like: false},
-      {id: 14, title: 'Eyes Wide Open', genre: 'Drama', date: '1926', like: false},
-      {id: 15, title: 'Eyes Closed', genre: 'Drama', date: '1926', like: false},
-    ],
-    genres: [
-      'Musical',
-      'Comedy',
-      'Drama',
-      'Biopic',
-      'Crime',
-    ],
-  };
+  constructor(props) {
+    super(props);
+    const stateOwner = (typeof props.stateOwner !== 'undefined')? props.stateOwner : this;
+    if (typeof props.stateOwner === 'undefined') {
+      this.state = {
+        movies: [ ...api.getMovies() ],
+        genres: [ ...api.getGenres() ],
+      };
+    }
+    this.likeHandler = this.likeHandler.bind(stateOwner);
+    this.editHandler = this.editHandler.bind(stateOwner);
+  }
 
-  likeHandler = (el) => {
+  componentWillMount() {
+    this.setTitleOnParent();
+  }
+
+  setTitleOnParent() {
+    let year = null;
+
+    const {match, setTitle} = this.props;
+
+    if (match.params.year) {
+      year = match.params.year;
+    }
+
+    if (typeof setTitle !== 'undefined') {
+      setTitle('Movies' + (year !== null ? ` from the year ${year}` : ''));
+    }
+  }
+
+  likeHandler(el) {
     // make a hard copy of movies because
     // we dont want to directly alter the state
     // we can only alter state through this.setState()
@@ -55,11 +67,24 @@ class Movies extends Component {
     let {id} = el;
     return (
       <Button
-        classes={['danger']}
+        classes={['danger', 'sm']}
         value='Delete'
-        clickHandler={() => {
-          this.setState({ movies: this.state.movies.filter(movie => movie.id !== id) });
-        } }
+        clickHandler={() => this.props.deleteMovie(id)}
+      />
+    );
+  };
+
+  editHandler(id) {
+    this.props.history.push(`/admin/movie/${id}`);
+  }
+
+  getEditButtonMarkup(el) {
+    let {id} = el;
+    return (
+      <Button
+        classes={['primary', 'sm']}
+        value='Edit'
+        clickHandler={() => this.editHandler(id)}
       />
     );
   };
@@ -74,6 +99,18 @@ class Movies extends Component {
     );
   };
 
+  getDateLinkMarkup(el) {
+    return (
+      <Link to={ `/movies/${ el.date }` }>{el.date}</Link>
+    );
+  }
+
+  getMovieLinkMarkup(el) {
+    return (
+      <Link to={ `/movie/${ el.id }` }>{el.title}</Link>
+    );
+  }
+
   render() {
 
     const headerRow = {
@@ -82,60 +119,98 @@ class Movies extends Component {
         title: 'Title',
         genre: 'Genre',
         date: 'Date',
+        stock: 'Stock',
+        rate: 'Rate',
         like: '',
         action: 'Action',
       },
     };
 
-    let {genres, movies} = this.state;
+    let {genres, movies} = (typeof this.props.stateOwner !== 'undefined')
+      ? this.props
+      : this.state;
+
+    const {match} = this.props;
+
+    let year = null;
+
+    if (match.params.year) {
+      year = match.params.year;
+      movies = movies.filter(m => m.date === year)
+    }
+
+    const allowedFilters = genres.map(g => {
+      return {
+        by: 'genre',
+        value: g.name,
+        el: {
+          key: g.id,
+          value:g.name
+        }
+      }
+    });
 
     return (
-      <div className="container">
-        <div className="row">
-          <div className="col-sm col-sm-12">
-            <h2 style={ {textAlign:'center'} }>Movies</h2>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col">
-            <FilterSortPaginatedTable
-              allowedFilters={ genres.map(g => { return {genre: g}}) }
-              blankFilter={ { all: 'All Genres' } }
+      <React.Fragment>
+        <FilterSortPaginatedTable
+          allowedFilters={allowedFilters}
+          blankFilters={[
+            { by: 'genre', value: 'All Genres', el: { key: 0, value: 'All Genres' } },
+            { by: 'title', value: '', el: { key: 0, value: '' } },
+          ]}
 
-              headerRow={ headerRow }
+          aboveTable={(
+            <Link
+              className={['btn', 'btn-primary', 'btn-sm'].join(' ')}
+              to="/admin/movie/new"
+            >
+              New Movie
+            </Link>
+          )}
 
-              sort={ {
-                sortableCols: Object.keys(headerRow.cellsObject).filter(a => a !== 'action'),
-              } }
+          headerRow={headerRow}
 
-              rowGenerator={ item => {
-                return {
-                  id: item.id,
-                  cellsObject: {
-                    title: item.title,
-                    genre: item.genre,
-                    date: item.date,
-                    like: this.getLikeMarkup(item),
-                    action: this.getDeleteButtonMarkup(item),
-                  },
-                };
-              } }
+          sort={{
+            sortableCols: Object.keys(headerRow.cellsObject).filter(a => a !== 'action'),
+          }}
 
-              items={ movies }
+          rowGenerator={item => {
+            return {
+              id: item.id,
+              cellsObject: {
+                title: this.getMovieLinkMarkup(item),
+                genre: item.genre,
+                date: this.getDateLinkMarkup(item),
+                stock: item.stock,
+                rate: item.rate,
+                like: this.getLikeMarkup(item),
+                action: (
+                  <div className="btn-group" role="group" aria-label="Hello">
+                    {this.getEditButtonMarkup(item)}
+                    {this.getDeleteButtonMarkup(item)}
+                  </div>
+                ),
+              },
+            };
+          }}
 
-              footerRow={ {
-                cellsObject: {
-                  data: `Total of ${movies.length}`,
-                }
-              } }
+          items={movies}
 
-              itemsPerPage={ 5 }
-            />
-          </div>
-        </div>
-      </div>
+          footerRow={(items) => {
+            return {
+              cellsObject: {
+                data: `Showing ${items.length} movies of ${movies.length}`,
+              }
+            }
+          }}
+
+          itemsPerPage={5}
+        />
+      </React.Fragment>
     );
   }
 }
+
+Movies.propTypes = propTypes;
 
 export default Movies;
