@@ -5,6 +5,10 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import 'bootstrap/dist/css/bootstrap.css';
 import { BrowserRouter } from 'react-router-dom'
+import config from './config.json'
+import logger from './services/logService.js'
+
+logger.init(config.logger);
 
 ReactDOM.render(
   <BrowserRouter>

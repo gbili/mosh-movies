@@ -31,8 +31,9 @@ class RegisterForm extends Form {
     this.props.setTitle('Register');
   }
 
-  onSubmitIsValid() {
-    console.log('submit is valid', this.state.data);
+  async onSubmitIsValid() {
+    await this.props.createUser(this.state.data);
+    this.props.history.replace('/');
   }
   onSubmitHasErrors() {
     console.log('submit has errors', this.state.errors);
@@ -42,27 +43,27 @@ class RegisterForm extends Form {
     return (
       <React.Fragment>
         <form onSubmit={this.handleSubmit}>
-          {this.renderInput(
-            'email',
-            'email',
-            "Enter email",
-            "Email Address",
-            "We'll never share your email with anyone else."
-          )}
-          {this.renderInput(
-            'password',
-            'password',
-            "Password",
-            "Crypt1K P455w0rd",
-            "Use a-zA-Z0-9 and special chars"
-          )}
-          {this.renderInput(
-            'name',
-            'text',
-            "Name",
-            "John",
-            "Your firstname"
-          )}
+          {this.renderInput({
+            name: 'email',
+            type: 'email',
+            label: 'Email',
+            placeholder: 'john@example.com',
+            help: `We'll never share your email with anyone else.`,
+          })}
+          {this.renderInput({
+            name: 'password',
+            type: 'password',
+            label: 'Password',
+            placeholder: 'H2k1E9.#32Ff899i',
+            help: 'Use a-zA-Z0-9 and special chars',
+          })}
+          {this.renderInput({
+            name: 'name',
+            type: 'text',
+            label: 'Name',
+            placeholder: 'John',
+            help: 'Your name',
+          })}
           {this.renderButton('Register')}
         </form>
       </React.Fragment>

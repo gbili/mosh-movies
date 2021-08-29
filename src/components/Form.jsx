@@ -36,6 +36,7 @@ class Form extends Component {
   }
 
   validateSingle({ name, value }) {
+    console.log(name, value);
     const schema = { [name]: this.schema[name] };
     const input = { [name]: value };
     const { error } = Joi.validate(input, schema, { abortEarly: false });

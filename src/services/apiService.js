@@ -1,8 +1,11 @@
 import http from './httpService';
 import config from '../config.json';
 
+function getUrl(what, id) {
+  return `${config.apiEndpoint}/${what}` + ((id && `/${id}`) || '');
+}
 async function getMovies() {
-  let {data: movies } = await http.get(`${config.apiEndpoint}/movies`);
+  let {data: movies } = await http.get(getUrl('movies'));
   movies = movies.map(m => {
     m.id = m._id;
     m.like = false;
@@ -13,7 +16,7 @@ async function getMovies() {
 }
 
 async function getGenres() {
-  let {data: genres } = await http.get(`${config.apiEndpoint}/genres`);
+  let {data: genres } = await http.get(getUrl('genres'));
   genres = genres.map(g => {
     g.id = g._id;
     return g;
@@ -36,7 +39,7 @@ async function createMovie(movie) {
   movie.id = 'fakeTempId';
   this.setState({ movies });
   try {
-    const {data} = await http.post(config.apiEndpoint + `/movies`, sendableData);
+    const {data} = await http.post(getUrl('movies'), sendableData);
     movie.id = data._id;
   } catch (e) {
     this.setState({ movies: moviesOld });
@@ -54,7 +57,7 @@ async function updateMovie(before, after) {
 
   this.setState({movies});
   try {
-    await http.put(config.apiEndpoint + `/movies/${before.id}`, sendableData);
+    await http.put(getUrl('movies', before.id), sendableData);
   } catch (e) {
     this.setState({movies:moviesOld});
   }
@@ -64,9 +67,27 @@ async function deleteMovie(id) {
   const moviesOld = [...this.state.movies];
   this.setState({ movies: this.state.movies.filter(m => m.id !== id) });
   try {
-    await http.delete(config.apiEndpoint + `/movies/${id}`);
+    await http.delete(getUrl('movies', id));
   } catch (e) {
     this.setState({movies:moviesOld});
+  }
+}
+
+async function createUser(data) {
+  try {
+    let {data: user} = await http.post(getUrl('users'), data);
+    this.setState({user});
+  } catch (e) {
+    throw new Error('user not created');
+  }
+}
+
+async function getUser(data) {
+  try {
+    let {data: user} = await http.post(getUrl('users'), data);
+    this.setState({user});
+  } catch (e) {
+    throw new Error('user not created');
   }
 }
 
@@ -76,4 +97,5 @@ export {
   deleteMovie,
   getMovies,
   getGenres,
+  createUser,
 }

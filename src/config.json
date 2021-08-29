@@ -1,3 +1,7 @@
 {
-  "apiEndpoint" : "http://localhost:3900/api"
+  "apiEndpoint" : "http://localhost:3900/api",
+  "logger" : {
+    "dsn": "https://5a794f25b1e043b993faaba53e56b12f@sentry.io/1454282",
+    "release": "0.0.1"
+  }
 }

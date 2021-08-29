@@ -37,7 +37,7 @@ class RoutesConfig {
     ];
   }
 
-  prepareRoutes(stateOwner, deleteMovie, stateGenres, stateMovies, setTitle) {
+  prepareRoutes(stateOwner, deleteMovie, stateGenres, stateMovies, setTitle, createUser) {
     this.routes = [
       {priority:16, title: 'Movies', path: '/movies/:year?', render: props => {
         return (
@@ -53,7 +53,15 @@ class RoutesConfig {
       }},
       {priority:15, title: 'Movie', path: '/movie/:id', component: Movie},
       {priority:11, title: 'Login', path: '/login', component: LoginForm},
-      {priority:13, title: 'Register', path: '/register', component: RegisterForm},
+      {priority:13, title: 'Register', path: '/register', render: props => {
+        return (
+          <RegisterForm
+            {...props}
+            setTitle={setTitle}
+            createUser={createUser}
+          />
+        );
+      }},
       {priority:9, title: 'Admin', path: '/admin', render: props => {
         return <Admin {...props} routes= { this.adminNestedRoutes } />
       }},

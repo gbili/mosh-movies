@@ -14,6 +14,7 @@ class App extends Component {
     title: 'No Title',
     movies: [],
     genres: [],
+    user: null,
   };
 
   constructor(props) {
@@ -24,6 +25,7 @@ class App extends Component {
     this.createMovie = api.createMovie.bind(this);
     this.updateMovie = api.updateMovie.bind(this);
     this.deleteMovie = api.deleteMovie.bind(this);
+    this.createUser = api.createUser.bind(this);
   }
 
   async componentDidMount() {
@@ -71,7 +73,8 @@ class App extends Component {
       this.deleteMovie,
       this.state.genres,
       this.state.movies,
-      this.setTitle
+      this.setTitle,
+      this.createUser
     );
 
     return (
@@ -80,6 +83,7 @@ class App extends Component {
         <Navigation
           routes={routesConfig.navigationElements}
           brand={{path:'/', title:'My App'}}
+          user={this.state.user}
         />
         <div className="container">
           <div className="row">

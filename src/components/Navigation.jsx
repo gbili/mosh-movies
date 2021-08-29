@@ -17,7 +17,7 @@ class Navigation extends Component {
   }
 
   render() {
-    let {brand, routes, location} = this.props;
+    let {brand, routes, location, user} = this.props;
 
     const {collapsed} = this.state;
     const sortNavItems = new Sort(routes);
@@ -31,6 +31,7 @@ class Navigation extends Component {
         >
           {brand.title}
         </Link>
+        {user && <span>{user.name}</span>}
         <button
           onClick={this.switchCollapsedState()}
           className={ "navbar-toggler" + (collapsed ? " collapsed" : "") }
